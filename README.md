@@ -74,7 +74,7 @@ First we need to add a new connection.
 
 * Click `connection` -> `Add connection`
 
-![Adding a connection (click image to enlarge)](img/01_edit_connection.png)
+![Adding a connection](img/01_edit_connection.png)
 
 A new window is shown where you can define the preferences for your new job.
 
@@ -86,7 +86,7 @@ A new window is shown where you can define the preferences for your new job.
 * Set the folder where your projects are stored. For me this is `/hpc/pmc_stunnenberg/wout/projects`;
 * Click `save`.
 
-![The connection dialog (click image to enlarge)](img/02_edit_connection_dialog.png)
+![The connection dialog](img/02_edit_connection_dialog.png)
 
 ### Connecting with the HPC host
 Now that our connection is ready, we want to connect to the host. 
@@ -94,7 +94,7 @@ Now that our connection is ready, we want to connect to the host.
 * Click `connection` -> `your connection name` -> `connect`
 * If the connection is OK, the program will connect to the server and synchronize your jobs;
 
-![The job list (click image to enlarge)](img/03_job_list.png)
+![The job list](img/03_job_list.png)
 
 ### Adding a new job
 Now it is time to submit a new job. 
@@ -107,13 +107,13 @@ Now it is time to submit a new job.
 * Select `RServer` as the editor; 
 * Click `OK`.
 
-![Adding a new job (click image to enlarge)](img/04_add_job.png)
+![Adding a new job](img/04_add_job.png)
 
 The job will be added to the list with a "stopwatch" symbol, indicating that it is scheduled, but not yet running. This status will be updated automatically every 10 mins, but we can do this manually using the `sync jobs` button. 
 
 * Click the `sync jobs` button every 20s until the job status changes. If the job is running a blue bar with remaining compute time will be shown;
 
-![Scheduled and active jobs (click image to enlarge)](img/05_job_scheduled.png)
+![Scheduled and active jobs](img/05_job_scheduled.png)
 
 * When the job is running, right click on your job and select `Open job in browser window`
 * A new tab will open in your browser with `Rserver`.
@@ -122,7 +122,7 @@ The job will be added to the list with a "stopwatch" symbol, indicating that it 
 
 __NB: Jobs will keep running when you close GratiSSH, make sure you delete running jobs that are not needed any more, because compute time will be deduced from our budget.__ You can close the program and re-attach running jobs after re-opening `GratiSSH` with the `sync jobs` button. Jobs that were not started from `GratiSSH`, e.g. a mapping job, will not be opened in this program.
 
-![Starting RServer from a running job (click image to enlarge)](img/06_open_running_job.png)
+![Starting RServer from a running job](img/06_open_running_job.png)
 
 ## Configuring Jupyter Labs
 If you prefer to work in *Jupyter labs*, you need to configure a security password first. The simplest way of doing this is running jupyter labs from the singularity image. Since singularity is only installed on the compute nodes and not on the submission nodes, we need to connect to a compute node first. Follow these steps:
