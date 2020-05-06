@@ -43,7 +43,7 @@ where *hpc* is the hostname you defined in your ~/.ssh/config file. Now login ag
 ## Configuring singularity
 By default, only your _home directory_ and _current working directory_ are bound by singularity. This means that you cannot access files in other folders. This can by changed by setting the __SINGULARITY_BIND__ variable in your `~/.bashrc` file. 
 
-* Type `vim ~/.bashrc` and add the line `export SINGULARITY_BIND="/hpc/pmc_stunnenberg,/home/wmegchelenbrink`. Subdirectories of these paths will also become available. Change "wmegchelenbrink" to your own user name and save the changes. 
+* Type `vim ~/.bashrc` and add the line `export SINGULARITY_BIND="/hpc/pmc_stunnenberg,/home/wmegchelenbrink`. Subdirectories of these paths will also be bound and available. Change "wmegchelenbrink" to your own user name and save the changes. 
 
 # Getting GratiSSH
 ## Downloading the latest release build
@@ -124,21 +124,28 @@ __NB: Jobs will keep running when you close GratiSSH, make sure you delete runni
 
 ![Starting RServer from a running job](img/06_open_running_job.png)
 
-## Configuring Jupyter Labs
-If you prefer to work in *Jupyter labs*, you need to configure a security password first. The simplest way of doing this is running jupyter labs from the singularity image. Since singularity is only installed on the compute nodes and not on the submission nodes, we need to connect to a compute node first. Follow these steps:
+## Configuring JupyterLab
+If you prefer to work in *JupyterLab*, you need to configure a security password first. The simplest way of doing this is running JupyterLab from the singularity image. Since singularity is only installed on the compute nodes and not on the submission nodes, we need to connect to a compute node first. Follow these steps:
 
 * Open a terminal and connect to the HPC;
 * Type `qlogin -l h_rt=2:00:00 -l h_vmem=8.0G` and provide your password. 
 * Now you should be on a compute node, indicated by a terminal prompt with <your_username>@n00XXX;
 * Type: `singularity exec /hpc/pmc_stunnenberg/shared/singularity_images/SC_container_Apr25.sif jupyter notebook password`, this may take a few seconds;
-* Provide your jupyter password, this will be hashed and stored in `~/.jupyter/jupyter_notebook_config.json`;
-* Now you can start a new job and select `Jupyter labs` as your preferred editor. When you open the job in a browser window, you will be prompted for the password you just set.
+* Provide your Jupyter password, this will be hashed and stored in `~/.jupyter/jupyter_notebook_config.json`;
+* Now you can start a new job and select `JupyterLab` as your preferred editor. When you open the job in a browser window, you will be prompted for the password you just set.
 
-# Running Rscripts in batch mode
-Using the singularity container, you can also run Rscripts in batch mode. This is both convenient and good practice, because you are using the exact same environment with the same R-packages and versions that you use for the interactive jobs defined above. As an example, we will run an R-script that normalizes some Celseq2 data and plots a TSNE, UMAP and a small heatmap with cluster marker genes.
+# Running R-scripts in batch mode
+Using the singularity container, you can also run R-scripts in batch mode. This is both convenient and good practice, because you are using the exact same environment with the same R-packages and versions that you use for the interactive jobs defined above. As an example, we will run an R-script that normalizes some Celseq2 data and plots a TSNE, UMAP and a small heatmap with cluster marker genes stored into PDF files.
 
-__TODO: download from github!__
+* Open a terminal
 ```{r, eval = F, echo = T}
+# Connect to HPC
+ssh hpc
+# Get the example files
+wget https://raw.githubusercontent.com/wmegchel/GratiSSH/master/examples/example_TSNE_UMAP_Heatmap.R
+wget https://github.com/wmegchel/GratiSSH/blob/master/examples/scRNAseq_Zic3_WT_and_KO.Rds
+
+# Execute the R-script
 singularity exec ~/ownCloud/sing_test/SC_container_Apr25.sif Rscript example_TSNE_UMAP_Heatmap.R
 ```
 
@@ -152,13 +159,5 @@ Having established an Rstudio environment that works interactively and in batch 
 * For Rstudio, type `singularity run --nv --app rstudio SC_container_Apr25.sif`
 * For JupterLab, type `singularity run --nv --app jupyterlab SC_container_Apr25.sif`
 
-# Listing the applications
+# Listing the applications in a singularity container
 `singularity inspect --list-apps SC_container_Apr25.sif`
-
-# TODO
-1 update the images with red circles
-2 add stuff to github
-
-- add support for SLURM and "native linux"
-- installing additional packages
-- add todo from the HPC_main_ui
