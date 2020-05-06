@@ -8,7 +8,7 @@ GratiSSH is based on [Tito Candelli's RRS](https://github.com/Slacanch/RRS), but
 __Of note__, the current version can only connect to a single server that runs SGE. It also lacks many of the desired features, but these are scheduled to be implemented within the near future.
 
 # Setting up your SSH config
-GratiSSH uses the connections defined in your `~/.ssh/config` file. If you did not define a connection to your HPC yet, type `open -a TextEdit ~/.ssh/config`. Insert the following text, change the YOUR_HPC_USERNAME to your HPC username and save the changes.
+GratiSSH uses the connections defined in your `~/.ssh/config` file. If you did not define a connection to your HPC yet, type `open -a TextEdit ~/.ssh/config` (Mac OSX). Insert the following text, change the YOUR_HPC_USERNAME to your HPC username and save the changes.
 
 ```{r, eval = F, echo = T}
 Host hpc
@@ -23,7 +23,7 @@ Host *
 ```
 
 ## Making and sending the RSA key
-To be able to connect from outside the PMC, the HPC administrators must add your RSA key to the system. If you do not have access to the HPC yet, generate a key using the following commands:
+To be able to connect from outside the Princess Maxima Center, the HPC administrators must add your RSA key to the system. If you do not have access to the HPC yet, generate a key using the following commands:
 
 ```{r, eval = F, echo = T}
 cd ~/.ssh
@@ -33,7 +33,6 @@ Provide a __strong passphrase (and remember it, you will need it later)__. Type 
 
 Usually, the adminstrators respond the same working day. If the administrator has added your key. You can now login using: `ssh hpc`. You will need to provide the password twice; once for login to the HPC gateway and once for login to the submit node. You will get tired of this very rapidly and more so, the interactive R-studio solution below will not work. Let's create a passwordless login.
 
-
 Log out of the HPC and type the following in a terminal on your __local__ PC/macbook:
 ```{r, eval = F, echo = T}
 cd ~/.ssh
@@ -42,14 +41,15 @@ ssh-copy-id -i ~/.ssh/id_rsa_hpc hpc
 where *hpc* is the hostname you defined in your ~/.ssh/config file. Now login again using `ssh hpc`. If all went well, no password will be asked.
 
 ## Configuring singularity
-By default, only your home directory and current working directory are bound by singularity. This means that you cannot access files in other folders. This can by changed by setting the SINGULARITY_BIND variable in your `~/.bashrc` file. 
+By default, only your _home directory_ and _current working directory_ are bound by singularity. This means that you cannot access files in other folders. This can by changed by setting the __SINGULARITY_BIND__ variable in your `~/.bashrc` file. 
 
 * Type `vim ~/.bashrc` and add the line `export SINGULARITY_BIND="/hpc/pmc_stunnenberg,/home/wmegchelenbrink`. Subdirectories of these paths will also become available. Change "wmegchelenbrink" to your own user name and save the changes. 
 
-# Running GratiSSH
-## Running the latest release build
-- Download the latest release at https://github.com/wmegchel/GratiSSH/releases (under 'assets');
-- If the Macbook is not owned by you, but by the PMC, you cannot access files from an untrusted source by just double clicking. 
+# Getting GratiSSH
+## Downloading the latest release build
+- Download the [latest release](https://github.com/wmegchel/GratiSSH/releases) under 'assets';
+- Double click the downloaded program;
+- If you're working on a PMC Macbook, you cannot access files from an untrusted source by just double clicking, but can still open the program from a terminal; 
 - Open a terminal and go to the directory where you saved GratiSSH;
 - Run the app by typing:
 
@@ -68,7 +68,8 @@ todo
 <!-- - paramiko -->
 <!-- - @todo: how to install using pip3 or conda -->
 
-### Adding/Editing a connection
+# Working with GratiSSH
+## Adding/Editing a connection
 First we need to add a new connection. 
 
 * Click `connection` -> `Add connection`
