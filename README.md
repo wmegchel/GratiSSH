@@ -141,6 +141,7 @@ Using the singularity container, you can also run R-scripts in batch mode. This 
 ```{r, eval = F, echo = T}
 # Connect to HPC
 ssh hpc
+
 # Get the example files
 wget https://raw.githubusercontent.com/wmegchel/GratiSSH/master/examples/example_TSNE_UMAP_Heatmap.R
 wget https://github.com/wmegchel/GratiSSH/blob/master/examples/scRNAseq_Zic3_WT_and_KO.Rds
