@@ -7,11 +7,21 @@ GratiSSH is designed to manage multiple jobs on one or multiple remote servers i
 
 __Of note__, future releases of GratiSSH will also manages "jobs" on a localhost, or remote server without a workload manager. 
 
-# Setting up your SSH config
-GratiSSH uses the connections defined in `~/.ssh/config`. 
+# Configuration
+## SSH host configuration file
+GratiSSH uses the connections defined in `~/.ssh/config`. Before you download GratiSSH, make sure you at least one host is defined here. See examples/example_ssh_config. Create an RSA key pair for your host using **ssh-keygen** and send the public key to the host using **ssh-copy-id**
 
+```{bash, eval=F}
+ssh-keygen -f ~/.ssh/my_hpc_rsa_key
+ssh-copy-id -i ~/.ssh/my_hpc_rsa_key my_username@host
+```
 ## Configuring singularity
-By default, singularity binds your _home directory_ and _current working directory_. This means that you cannot access files in other folders. This can by changed by setting the __SINGULARITY_BIND__ variable in your `~/.bashrc` file. 
+By default, singularity binds your _home directory_ and _current working directory_. This means that you cannot access files in other folders on the remote server. This can by changed by setting the __SINGULARITY_BIND__ variable in your `~/.bashrc` file. For example:
+
+```{bash, eval=F}
+export SINGULARITY_BIND="/home/research/,/scratch/wout"
+```
+binds the `/home/research` and `/scratch/wout` directories as well, which become available in your singularity container.
 
 # Getting GratiSSH
 ## Downloading the latest release build
