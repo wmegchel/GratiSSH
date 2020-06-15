@@ -1,72 +1,23 @@
 # About GratiSSH
-The _GRAphical Tool for Interactive Scientfic Scripting on HPC (GratiSSH)_ makes it easy to run an interactive Rstudio server or JupyterLab environment on a remote Linux server. GratiSSH was designed to work with HPCs that run the popular [SLURM](https://slurm.schedmd.com/documentation.html) or [SGE](https://en.wikipedia.org/wiki/Oracle_Grid_Engine) job scheduling manager, but can run on Linux servers without job scheduling system.
+The _GRAphical Tool for Interactive Scientfic Scripting on HPC (GratiSSH)_ makes it easy to run an interactive Rstudio server or JupyterLab environment on a remote Linux server. GratiSSH was designed to work with HPCs that run the popular [SLURM](https://slurm.schedmd.com/documentation.html) or [SGE](https://en.wikipedia.org/wiki/Oracle_Grid_Engine) workload managers.
 
-GratiSSH is written in Python and uses the PyQt5 graphical environment. Under the hood, GratiSSH connects to a [singularity container](https://sylabs.io/docs/) that is stored on the remote server. This singularity container has [Rstudio](https://rstudio.com), [Rstudio server](https://rstudio.com/products/rstudio/#rstudio-server), [JupyterLab](https://jupyterlab.readthedocs.io/en/stable/) and many R-packages tailored to single cell analysis, such as [Seurat](https://satijalab.org/seurat/) and [Monocle3](https://cole-trapnell-lab.github.io/monocle3) pre-installed. The same singularity environment can be used to run batch jobs or on a local computer, using the same compute stack of R, Rstudio, JupyterLab and all installed packages.
+GratiSSH is written in Python and uses the PyQt5 graphical environment. Under the hood, GratiSSH connects to a [singularity container](https://sylabs.io/docs/) that is stored on the remote server. This singularity container contains [Rstudio server](https://rstudio.com/products/rstudio/#rstudio-server), [JupyterLab](https://jupyterlab.readthedocs.io/en/stable/) and many R-packages tailored to single cell analysis, such as [Seurat](https://satijalab.org/seurat/) and [Monocle3](https://cole-trapnell-lab.github.io/monocle3). 
 
-GratiSSH is based on [Tito Candelli's RRS](https://github.com/Slacanch/RRS), but provides an improved user interface (at least i.m.o.). Furthermore, GratiSSH is designed to manage connections with multiple remote servers in parallel and can connect to Linux systems running SLURM, SGE or a no job scheduling system. GratiSSH has been tested on Mac OSX and Ubuntu Linux. Pre-combined binaries are available under "releases". 
+GratiSSH is designed to manage multiple jobs on one or multiple remote servers in parallel. Pre-combined binaries for Mac OSX and Ubuntu are available under "releases". 
 
-__Of note__, the current version can only connect to a single server that runs SGE. It also lacks many of the desired features, but these are scheduled to be implemented within the near future.
+__Of note__, future releases of GratiSSH will also manages "jobs" on a localhost, or remote server without a workload manager. 
 
 # Setting up your SSH config
-GratiSSH uses the connections defined in your `~/.ssh/config` file. If you did not define a connection to your HPC yet, type `open -a TextEdit ~/.ssh/config` (Mac OSX). Insert the following text, change the YOUR_HPC_USERNAME to your HPC username and save the changes.
-
-```{r, eval = F, echo = T}
-Host hpc
-  HostName hpcs04.op.umcutrecht.nl
-  User YOUR_HPC_USERNAME
-  ProxyCommand ssh -i ~/.ssh/id_rsa_hpc -l YOUR_HPC_USERNAME hpcgw.op.umcutrecht.nl nc %h %p 2>/dev/null
-  IdentityFile ~/.ssh/id_rsa_hpc
-
-Host *
-  AddKeysToAgent yes
-  UseKeychain yes
-```
-
-## Making and sending the RSA key
-To be able to connect from outside the Princess Maxima Center, the HPC administrators must add your RSA key to the system. If you do not have access to the HPC yet, generate a key using the following commands:
-
-```{r, eval = F, echo = T}
-cd ~/.ssh
-ssh-keygen -t rsa -C HPC -f id_rsa_hpc
-```
-Provide a __strong passphrase (and remember it, you will need it later)__. Type `ls -ltrh` and there should be a `id_rsa_hpc.pub` file. Send this file as an attachment to: hpc-systems@lists.umcutrecht.nl
-
-Usually, the adminstrators respond the same working day. If the administrator has added your key. You can now login using: `ssh hpc`. You will need to provide the password twice; once for login to the HPC gateway and once for login to the submit node. You will get tired of this very rapidly and more so, the interactive R-studio solution below will not work. Let's create a passwordless login.
-
-Log out of the HPC and type the following in a terminal on your __local__ PC/macbook:
-```{r, eval = F, echo = T}
-cd ~/.ssh
-ssh-copy-id -i ~/.ssh/id_rsa_hpc hpc
-```
-where *hpc* is the hostname you defined in your ~/.ssh/config file. Now login again using `ssh hpc`. If all went well, no password will be asked.
+GratiSSH uses the connections defined in `~/.ssh/config`. 
 
 ## Configuring singularity
-By default, only your _home directory_ and _current working directory_ are bound by singularity. This means that you cannot access files in other folders. This can by changed by setting the __SINGULARITY_BIND__ variable in your `~/.bashrc` file. 
-
-* Type `vim ~/.bashrc` and add the line `export SINGULARITY_BIND="/hpc/pmc_stunnenberg,/home/wmegchelenbrink`. Subdirectories of these paths will also be bound and available. Change "wmegchelenbrink" to your own user name and save the changes. 
+By default, singularity binds your _home directory_ and _current working directory_. This means that you cannot access files in other folders. This can by changed by setting the __SINGULARITY_BIND__ variable in your `~/.bashrc` file. 
 
 # Getting GratiSSH
 ## Downloading the latest release build
 - Download the [latest release](https://github.com/wmegchel/GratiSSH/releases) under 'assets';
-- Double click the downloaded program;
-- If you're working on a PMC Macbook, you cannot access files from an untrusted source by just double clicking, but can still open the program from a terminal; 
-- Open a terminal and go to the directory where you saved GratiSSH;
-- Run the app by typing:
-
-```{r, eval = F, echo = T}
-chmod 755 GratiSSH_v001_alpha_MACOSX
-./GratiSSH_v001_alpha_MACOSX
-```
-- The program should now start
-
-## Building GratiSSH from source
-todo
-<!-- - Clone the Github repository -->
-<!-- - Python3 -->
-<!-- - PyQt5 -->
-<!-- - tinydb -->
-<!-- - paramiko -->
-<!-- - @todo: how to install using pip3 or conda -->
+- Unzip the program
+- Double click the unzipped program to start
 
 # Working with GratiSSH
 ## Adding/Editing a connection
@@ -81,15 +32,15 @@ A new window is shown where you can define the preferences for your new job.
 * Select the `host name` you want to connect to from the dropdown menu. These host names are taken from the `~/.ssh/config` file. If your host is not in this menu, add it to the  `~/.ssh/config` file;
 * Provide a `connection name`, this can be any name;
 * Provide the `passphrase` you defined for your ssh key. If you did not provide any key, leave this field blank;
-* Choose `grid engine` is `SGE`. Others are not implemented yet;
-* Set the path to the singularity files. These are stored at `/hpc/pmc_stunnenberg/shared/singularity_images`;
-* Set the folder where your projects are stored. For me this is `/hpc/pmc_stunnenberg/wout/projects`;
+* Choose `grid engine` `SGE` or `SLURM`.
+* Set the path to the singularity files. 
+* Set the folder where your projects are stored.
 * Click `save`.
 
 ![The connection dialog](img/02_edit_connection_dialog.png)
 
 ### Connecting with the HPC host
-Now that our connection is ready, we want to connect to the host. 
+Now that our connection is ready, we can to connect to the host. 
 
 * Click `connection` -> `your connection name` -> `connect`
 * If the connection is OK, the program will connect to the server and synchronize your jobs;
@@ -97,7 +48,7 @@ Now that our connection is ready, we want to connect to the host.
 ![The job list](img/03_job_list.png)
 
 ### Adding a new job
-Now it is time to submit a new job. 
+To submit a new job: 
 
 * Click `add job`;
 * Select the project you want to work on. These are the subfolders defined in the project folder you selected above.
@@ -162,3 +113,15 @@ Having established an Rstudio environment that works interactively and in batch 
 
 # Listing the applications in a singularity container
 `singularity inspect --list-apps SC_container_Apr25.sif`
+
+
+
+
+## Building GratiSSH from source
+todo
+<!-- - Clone the Github repository -->
+<!-- - Python3 -->
+<!-- - PyQt5 -->
+<!-- - tinydb -->
+<!-- - paramiko -->
+<!-- - @todo: how to install using pip3 or conda -->
