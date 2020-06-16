@@ -26,8 +26,8 @@ binds the `/home/research` and `/scratch/wout` directories as well, which become
 
 ## Downloading the latest release build
 - Download the [latest release](https://github.com/wmegchel/GratiSSH/releases) under 'assets';
-- Unzip the program
-- Double click the unzipped program to start
+- Open a Shell and make the program executable: `chmod 755 GratiSSH`
+- Run the program with `./GratiSSH`
 
 ## Working with GratiSSH
 ### Adding/Editing a connection
