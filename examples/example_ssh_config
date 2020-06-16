@@ -1,0 +1,8 @@
+Host hpc
+ Hostname hpc.somedomain.org
+ User hpc_user
+ Proxycommand ssh -i ~/.ssh/id_rsa_hpc -l hpc_user hpcgateway.somedomain.com nc %h %p 2>/dev/null
+ IdentityFile ~/.ssh/id_rsa_hpc
+
+Host *
+  AddKeysToAgent yes

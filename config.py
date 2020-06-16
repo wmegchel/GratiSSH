@@ -5,7 +5,7 @@ DB = TinyDB(os.path.expanduser('~/HPC_jobs.json'))
 
 JOB_PREFIX = "IJM"
 JOB_SEPARATOR = "__"
-WINDOW_TITLE = "HPC interactive job manager"
+WINDOW_TITLE = "GratiSSH"
 #MAIN_WINDOW_SIZE = [2100, 1500]
 
 # Perform qstat every 5 mins

@@ -1,137 +1,77 @@
-# -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'new_job.ui'
-#
-# Created by: PyQt5 UI code generator 5.14.1
-#
-# WARNING! All changes made in this file will be lost!
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QDialog, QSpinBox, QDoubleSpinBox, QComboBox, QTimeEdit, QVBoxLayout
-from tinydb import TinyDB, where
-import re
-import random
+from sshtunnel import *
+from PyQt5.QtCore import *
+import os
 
 
-class Job(QDialog):
+class Job:
 
-    def __init__(self, *args, **kwargs):
-        super(Job, self).__init__(*args)
+    #msgSignal = pyqtSignal(dict)
 
-        db = TinyDB('/home/wmegchel/tinydb.json')
-        self.dbTable = db.table('jobs')
+    def __init__(self, connection=None, jobID=None, jobName=None, projectFolder=None, startTime=None,
+                 runTime=2, nCPU=1, nGPU=0, memory=16, singularityImg=None,
+                 workerNode=None, status=None, editor=None, port=None, tunnel=None):
 
-        self.setWindowTitle("Add job")
-        self.connection = kwargs['connection']
+        # super(Job, self).__init__()
+        # print("init super done")
+        self.connection = connection
+        self.jobID = jobID
+        self.jobName = jobName
+        self.projectFolder = projectFolder
+        self.startTime = startTime
+        self.runTime = runTime
+        self.nCPU = nCPU
+        self.nGPU = nGPU
+        self.memory = memory
+        self.singularityImg = singularityImg
+        self.workerNode = workerNode
+        self.status = status
+        self.editor = editor
+        self.port = port
+        self.tunnel = tunnel
+        # print("all init done")
 
-        # Set fields
-        self.jobID = kwargs['jobID']
-        self.jobName = kwargs['jobName']
-        self.projectFolder = kwargs['projectFolder']
-        self.runtime = kwargs['runtime']
-        self.nCPU = kwargs['nCPU']
-        self.nGPU = kwargs['nGPU']
-        self.memory = kwargs['memory']
-        self.singularityImg = kwargs['singularityImg']
+        #super(Job, self).__init__(jobID)
 
+    def openSSHTunnel(self, jobView):
 
-    #    self.setupUi()
+        user_config_file = os.path.expanduser("~/.ssh/config")
 
+        try:
+            if isinstance(self.tunnel, SSHTunnelForwarder) and self.tunnel.is_alive():
+                return
 
-    # Make this function showForm or something like that
-    def showForm(self):
-        self.resize(800, 470)
-        self.vLayout = QVBoxLayout(self)
-        self.groupbox = QtWidgets.QGroupBox("New job on %s" % self.connection.connectionName)
-
-        self.vLayout.addWidget(self.groupbox)
-
-        self.frmLayout = QtWidgets.QFormLayout(self.groupbox)
-
-        # Project folder
-        self.cmbProjectFolder = QComboBox()
-
-
-        # check if false, then show message.
-        # if exists but no subdirs exist ; also show message
-        for project in self.connection.getProjects():
-            self.cmbProjectFolder.addItem(project)
-
-        index = self.cmbProjectFolder.findText(self.projectFolder, QtCore.Qt.MatchFixedString)
-        if index >= 0:
-            self.cmbProjectFolder.setCurrentIndex(index)
-        self.frmLayout.addRow(QLabel("Project:"), self.cmbProjectFolder)
-
-        # Jobname
-        self.edtJobName = QLineEdit()
-        self.edtJobName.setText(self.jobName)
-        self.frmLayout.addRow(QLabel("Job name:"), self.edtJobName)
-
-        # Runtime
-        self.spinRuntime = QSpinBox()
-        self.spinRuntime.setValue(self.runtime)
-        self.frmLayout.addRow(QLabel("Runtime (hours):"), self.spinRuntime)
-
-        # Nr of CPU
-        self.spinNrOfCPU = QSpinBox()
-        self.spinNrOfCPU.setValue(self.nCPU)
-        self.frmLayout.addRow(QLabel("# CPU:"), self.spinNrOfCPU)
-
-        # Nr of GPU
-        self.spinNrOfGPU = QSpinBox()
-        self.spinNrOfGPU.setValue(self.nGPU)
-        self.frmLayout.addRow(QLabel("# GPU:"), self.spinNrOfGPU)
-
-        # Memory
-        self.spinMemory = QDoubleSpinBox()
-        self.spinMemory.setValue(self.memory)
-        self.frmLayout.addRow(QLabel("Memory (GB):"), self.spinMemory)
-
-        # Singularity image
-        self.cmbSingularityImg = QComboBox()
-        for imgName in self.connection.getSingularityImages():
-            self.cmbSingularityImg.addItem(imgName)
-
-        index = self.cmbSingularityImg.findText(self.singularityImg, QtCore.Qt.MatchFixedString)
-        if index >= 0:
-            self.cmbSingularityImg.setCurrentIndex(index)
-        self.frmLayout.addRow(QLabel("Singularity image:"), self.cmbSingularityImg)
+            if self.connection.passphrase != "":
+                self.tunnel = SSHTunnelForwarder(self.connection.hostName, ssh_config_file=user_config_file,
+                                                 remote_bind_address=(self.workerNode, int(self.port)),
+                                                 local_bind_address=('localhost', int(self.port)),
+                                                 allow_agent=True, ssh_password=self.connection.passphrase,
+                                                 set_keepalive=10)
+            else:
+                self.tunnel = SSHTunnelForwarder(self.connection.hostName, ssh_config_file=user_config_file,
+                                                 remote_bind_address=(self.workerNode, int(self.port)),
+                                                 local_bind_address=('localhost', int(self.port)),
+                                                 allow_agent=True,
+                                                 set_keepalive=10)
+            self.tunnel.start()
+            return True
+        except BaseSSHTunnelForwarderError as e:
+            return str(e),
+        except HandlerSSHTunnelForwarderError as e:
+            return str(e),
+        except:
+            return str(sys.exc_info()[1])
 
 
+    def closeSSHTunnel(self, jobView):
 
-
-
-        QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
-
-        self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-
-        self.vLayout.addWidget(self.buttonBox)
-        self.setLayout(self.vLayout)
-
-
-    def getAll(self):
-        return self.dbTable.search(where('connectionID') == self.connectionID)
-
-
-    def validate(self):
-
-        # jobname
-        # project folder set and present, as well as cookies subdir present
-        # runtime > 0.01 and < 23
-        # cpu >1 <= 20
-        # gpu (hide for now)
-        # memory: (1GB - 12GB)
-        # singularity image present
-
-
-        print("validationg jobs")
-        self.connection.file_exists()
-        return True
-
-    # Save job to DB
-    def save(self):
-        print("saving job %s to DB" % self.jobID)
-        return True
-
+        if isinstance(self.tunnel, SSHTunnelForwarder):
+            try:
+                self.tunnel.close()
+                return True
+            except BaseSSHTunnelForwarderError as e:
+                return str(e),
+            except HandlerSSHTunnelForwarderError as e:
+                return str(e),
+            except:
+                return str(sys.exc_info()[1])
