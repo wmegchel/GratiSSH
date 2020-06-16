@@ -128,4 +128,5 @@ Clone the git repository and run pyinstaller:
 ```{bash}
 pyinstaller --onefile gratissh_custom.spec
 ```
+The standalone executable will be created in the *dist* subfolder.
 
