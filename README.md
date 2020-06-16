@@ -82,7 +82,7 @@ The job will be added to the list with a "stopwatch" symbol, indicating that it 
 * Delete a job by right clicking the job and selecting `Delete job`;
 * Delete all running jobs by clicking the `Delete all jobs` button;
 
-__NB: Jobs will keep running when you close GratiSSH, make sure you delete running jobs that are not needed any more, because compute time will be deduced from our budget.__ You can close the program and re-attach running jobs after re-opening `GratiSSH` with the `sync jobs` button. Jobs that were not started from `GratiSSH`, e.g. a mapping job, will not be opened in this program.
+**NB:** Jobs will keep running when you close the program and reconnect when you re-open GratiSSH. Use the **Delete all jobs** to avoid draining your HPC budget unnecessarily with jobs you don't use.
 
 ![Starting RServer from a running job](img/06_open_running_job.png)
 
