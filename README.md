@@ -111,10 +111,21 @@ singularity exec ~/ownCloud/sing_test/SC_container_Apr25.sif Rscript example_TSN
 ```
 
 ## Building GratiSSH from source
-todo
-<!-- - Clone the Github repository -->
-<!-- - Python3 -->
-<!-- - PyQt5 -->
-<!-- - tinydb -->
-<!-- - paramiko -->
-<!-- - @todo: how to install using pip3 or conda -->
+To build GratiSSH from source, you need **python3** and the python packages: pyinstaller, PyQt5, paramiko, tinydb, sshconf, sshtunnel and waitingspinnerwidget. 
+
+
+```{bash}
+pip3 install pyinstaller
+pip3 install PyQt5
+pip3 install paramiko
+pip3 install tinydb
+pip3 install sshconf
+pip3 install sshtunnel
+pip3 install pyqtspinner
+```
+
+Clone the git repository and run pyinstaller:
+```{bash}
+pyinstaller --onefile gratissh_custom.spec
+```
+
