@@ -131,5 +131,5 @@ pyinstaller --onefile gratissh_custom.spec
 The standalone executable will be created in the *dist* subfolder.
 
 # Acknowledgement
-GratiSSH is inspired by the Python kivy application [RRS](https://github.com/Slacanch/RRS). GratiSSH uses PyQt5 to enable a more desktop-like interface and support connections with multiple hosts.
+GratiSSH is inspired by the Python kivy application [RRS](https://github.com/Slacanch/RRS). GratiSSH uses PyQt5 to enable a more desktop-like interface and supports connections with multiple hosts using SGE or SLURM.
 
