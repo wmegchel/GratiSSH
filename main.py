@@ -5,11 +5,21 @@
 # Interactive Job scheduler v0.1 alpha
 # License: todo
 #
+
+# - fixed disconnect
+
+
 ################ TODO #######################
 # x tunnel does not work
 # x fix icon size OSX
 # x edit connection window is very small on OSX (small input fields) => should scale, no?
 # x center text horizontally in the TableView
+
+
+
+
+
+
 
 # -------------- LATER ---------------------
 # - why is the main menu lost in OSX ??
@@ -21,13 +31,13 @@
 # x update to latest Rstudio
 # x update to R version 4.0 (Friday)
 # x encrypt/decrypt passphrase => probably not possible
-# - sync does not work properly
+# x sync does not work properly
 # x check if the SSH tunnel is open, and if so do not create another one
-# - add a "clear log" button
+# x add a "clear log" button
 # x add SLURM support
 # x add no schedulure support
 # - add debug info
-# - start up Rserver in the right directory
+# x start up Rserver in the right directory
 # - write manual
 # - get log data from the DB as well
 # x fix the "loss of connection" after edit or save connection (DONE)
@@ -194,18 +204,36 @@ class MyMainWindow(QMainWindow):
 
 
     def connect(self, connectionID):
-        conn = self.connections[connectionID]
-        self.jobList[connectionID].syncJobs()
 
-        # update icons to connected
-        self.menuConnection[conn.connectionID].setIcon(self.icon_connected)
+        if self.subItemConnect[connectionID].text() == "Connect":
+            conn = self.connections[connectionID]
+            self.jobList[connectionID].syncJobs()
 
-        index = self.tabWidget.indexOf(self.jobList[connectionID])
-        self.tabWidget.setCurrentIndex(index)
-        self.tabWidget.setTabIcon(index, self.icon_connected)
+            # update icons to connected
+            self.menuConnection[conn.connectionID].setIcon(self.icon_connected)
 
-        # change menu text to disconnect
-        self.subItemConnect[connectionID].setText("Disconnect")
+            index = self.tabWidget.indexOf(self.jobList[connectionID])
+            self.tabWidget.setCurrentIndex(index)
+            self.tabWidget.setTabIcon(index, self.icon_connected)
+
+            # change menu text to disconnect
+            self.subItemConnect[connectionID].setText("Disconnect")
+
+            self.jobList[connectionID].isConnected()
+
+        else:
+            msg = {'connectionID': connectionID,
+                   "jobID": None,
+                    "message": "Connection closed",
+                    "messageType": "SUCCESS"}
+            self.jobList[connectionID].writeLog(msg)
+            self.connections[connectionID].disconnect()
+            index = self.tabWidget.indexOf(self.jobList[connectionID])
+            self.tabWidget.setCurrentIndex(index)
+            self.tabWidget.setTabIcon(index, self.icon_disconnected)
+            self.subItemConnect[connectionID].setText("Connect")
+            self.jobList[connectionID].isDisconnected()
+
 
     def addConnection(self):
 
@@ -272,7 +300,10 @@ class MyMainWindow(QMainWindow):
                               passphrase=frm.edtPassphrase.text(),
                               gridEngine=gridEngine,
                               projectRootFolder=frm.edtProjectRootFolder.text(),
-                              singularityFolder=frm.edtSingularityFolder.text())
+                              singularityFolder=frm.edtSingularityFolder.text(),
+                              threadpool=self.connections[connectionID].threadpool,
+                              sshClient=self.connections[connectionID].sshClient,
+                              sftpClient=self.connections[connectionID].sftpClient)
             connUpdated = conn.save()
 
             if self.connections[connectionID].isConnected():
@@ -287,7 +318,7 @@ class MyMainWindow(QMainWindow):
                    'message': message,
                    'messageType': 'SUCCESS'}
 
-
+            self.jobList[connectionID].updateConnection(connUpdated)
             self.jobList[connectionID].writeLog(msg)
 
             # Reconnect, if we were connected

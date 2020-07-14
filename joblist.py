@@ -14,7 +14,8 @@ from jobtable_view import JobTableView
 from job_form import JobForm
 from ssh_worker import Worker, WorkerSignals
 from job_queue import JobQueue
-
+from random import randint
+from math import floor
 
 class JobList(QWidget):
 
@@ -23,8 +24,9 @@ class JobList(QWidget):
         self.connection = connection
         self.jobTableModel = JobTableModel()
         self.jobTableView = JobTableView(self.jobTableModel)
-        self.dbTable = config.DB.table("jobs")
+        #self.dbTable = config.DB.table("jobs")
         self.log = Logger(jobList=self)
+        self.listJobs()
         self.tunnels = {}
         self.threadpool = QThreadPool()
 
@@ -35,8 +37,50 @@ class JobList(QWidget):
         self.spinner.setLineLength(20)
         self.spinner.setLineWidth(5)
 
-        self.listJobs()
+        # Init, but do not start timers before
+        # a connection with the server is established
+        self.timer = QTimer(self)
+        self.timer.setInterval(1000)
+        self.timer.timeout.connect(self.smartSync)
 
+        self.elapsedTimer = QElapsedTimer()
+        self.loaded = False
+        self.jobsPending = True
+
+    def isConnected(self):
+        self.timer.start()
+        self.elapsedTimer.restart()
+        self.labelJobs.setText("Connecting with %s" % self.connection.connectionName)
+        self.labelJobs.setStyleSheet("QLabel { color : black; }")
+
+    def isDisconnected(self):
+        self.timer.stop()
+        self.labelJobs.setText("Not connected with  %s" % self.connection.connectionName)
+        self.labelJobs.setStyleSheet("QLabel { color : red; }")
+
+    def updateConnection(self, connection):
+        self.connection = connection
+
+    def smartSync(self):
+
+        if self.loaded:
+            minutes = floor(self.elapsedTimer.elapsed() / (60 * 1000))
+            seconds = self.elapsedTimer.elapsed() % (60 * 1000) / 1000
+
+            self.labelJobs.setText("Jobs (%d). Last update: %d min and %d sec ago" %
+                                   (len(self.jobTableModel.jobs), minutes, seconds))
+
+            if self.jobsPending and self.elapsedTimer.hasExpired(config.SYNC_JOBS_WITH_SERVER_INTERVAL_SECONDS_SHORT * 1000):
+                self.syncJobs()
+            elif self.elapsedTimer.hasExpired(config.SYNC_JOBS_WITH_SERVER_INTERVAL_SECONDS_LONG * 1000):
+                self.syncJobs()
+
+    def updateJobsPending(self):
+        self.jobsPending = False
+        for jobID, job in self.jobTableModel.jobs.items():
+            if job.status == 0:
+                self.jobsPending = True
+                return
 
     def listJobs(self):
 
@@ -50,7 +94,13 @@ class JobList(QWidget):
         font = QFont()
         font.setBold(True)
         font.setWeight(75)
-        self.labelJobs = QLabel("Jobs (%d)" % len(self.jobTableModel.jobs))
+
+        if self.connection.isConnected():
+            self.labelJobs = QLabel("Jobs (%d)" % len(self.jobTableModel.jobs))
+            self.labelJobs.setStyleSheet("QLabel { color : black; }")
+        else:
+            self.labelJobs = QLabel("Not connected with %s" % self.connection.connectionName)
+            self.labelJobs.setStyleSheet("QLabel { color : red; }")
         self.labelJobs.setFont(font)
         self.vLayout.addWidget(self.labelJobs)
 
@@ -153,7 +203,6 @@ class JobList(QWidget):
         # Start a worker that calls the __connect function and
         # synchronizes the jobs running on the server
 
-        #print("JOBLIST -> syncJobs")
         Q = JobQueue.getQueueObject(self.connection)
 
         # connect to host
@@ -163,15 +212,15 @@ class JobList(QWidget):
         worker.signals.jobsSynced.connect(self.jobTableModel.setJobs)
         worker.signals.updateFinished.connect(self.updateFinished)
 
-        #print("starting worker")
-        # Execute job
         self.threadpool.start(worker)
-        #print("emit layout changed")
+        self.updateJobsPending()
 
     def addJob(self):
         frm = JobForm(Job(connection=self.connection))
         frm.setModal(True)
         if frm.exec():
+
+            port = randint(8787, 10000)
 
             # Submit
             job = Job(connection=self.connection,
@@ -187,9 +236,8 @@ class JobList(QWidget):
                       workerNode=None,
                       status=0,
                       editor=frm.cmbEditor.currentText().strip(),
-                      port=None)
+                      port=port)
 
-            #print(" >> submitting job now!!!! << ")
             self.submitJob(job)
 
 
@@ -200,8 +248,6 @@ class JobList(QWidget):
 
 
     def submitJob(self, job):
-
-        #print("calling elvis .. the worker")
         Q = JobQueue.getQueueObject(self.connection)
 
         worker = Worker(Q.submitJob, job=job, task="submit")
@@ -213,11 +259,11 @@ class JobList(QWidget):
         worker.signals.jobSubmitted.connect(self.jobTableModel.addJob)
         worker.signals.updateFinished.connect(self.updateFinished)
 
+        self.jobsPending = True
         self.threadpool.start(worker)
 
-    # @pyqtSlot(Job)
-    # def appendJobToList(self, job):
-    #     self.jobs[job.jobID] = job
+
+
 
     def confirmDeleteJob(self, index):
         jobIDs = list(self.connection.jobs.keys())
@@ -289,13 +335,18 @@ class JobList(QWidget):
     def updateFinished(self):
         self.spinner.stop()
 
-        self.labelJobs.setText("Jobs (%d)" % len(self.jobTableModel.jobs))
+        # emit layout changed to reload all jobs
         self.jobTableModel.layoutChanged.emit()
+
+        # enable buttons
         self.addButton.setEnabled(True)
         self.deleteAllButton.setEnabled(True)
         self.syncButton.setEnabled(True)
         self.clearLogButton.setEnabled(True)
 
+        # restart timer
+        self.loaded = True
+        self.elapsedTimer.restart()
 
     def writeLog(self, msg):
         self.log.writeLine(connectionID=msg['connectionID'], jobID=msg['jobID'], message=msg['message'],
@@ -305,10 +356,11 @@ class JobList(QWidget):
     def browse(self, jobID):
         job = self.jobTableModel.jobs[jobID]
         res = job.openSSHTunnel(self)
-        if res == True:
+
+        if res is True:
             webbrowser.open_new_tab("http://localhost:%d" % int(job.port))
         else:
-            self.log.writeLine(connectionID=self.connection.connectionID, jobID=jobID, message=res, messageType="ERR", show=True)
+            self.log.writeLine(connectionID=self.connection.connectionID, jobID=jobID, message=res, messageType="ERROR", show=True)
 
 
     # Change the image from "normal" to "hot" on mouseover

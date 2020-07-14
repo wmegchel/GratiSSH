@@ -3,7 +3,6 @@ import xml.etree.ElementTree as ET
 import config
 from math import floor
 from job import Job
-from random import randint
 from job_queue import JobQueue
 
 
@@ -103,8 +102,6 @@ class SgeQueue(JobQueue):
 
         fullJobName = job.jobName
         fullJobName = fullJobName.replace(" ", "_")
-        job.port = randint(8787, 10000)
-
         fullJobName = "%s%s%s%s%s%s%s%s%s%s%d" % (config.JOB_PREFIX, config.JOB_SEPARATOR,
                                                   fullJobName, config.JOB_SEPARATOR,
                                                   job.projectFolder, config.JOB_SEPARATOR,

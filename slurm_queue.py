@@ -2,7 +2,6 @@ import sys, re, os
 import config
 from math import floor
 from job import Job
-from random import randint
 from job_queue import JobQueue
 import paramiko
 from datetime import datetime
@@ -75,7 +74,7 @@ class SlurmQueue(JobQueue):
                     runTime = int(datetime.strptime(fields[3], "%H:%M:%S").strftime("%H")) + \
                               int(datetime.strptime(fields[3], "%H:%M:%S").strftime("%M")) / 60
 
-                memory = fields[4]
+                memory = fields[4][:-1]
 
                 if status == "PD":
                     status = 0
@@ -85,7 +84,8 @@ class SlurmQueue(JobQueue):
                     startTime = datetime.strptime(fields[7], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d %H:%M:%S")
                     workerNode = fields[8]
                 else:
-                    continue
+                    status = 2
+                    startTime = datetime.strptime(fields[5], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d %H:%M:%S")
 
                 jobs[jobID] = Job(connection=self.connection,
                                   jobID=jobID,
@@ -123,7 +123,6 @@ class SlurmQueue(JobQueue):
 
         fullJobName = job.jobName
         fullJobName = fullJobName.replace(" ", "_")
-        job.port = randint(8787, 10000)
 
         fullJobName = "%s%s%s%s%s%s%s%s%s%s%d" % (config.JOB_PREFIX, config.JOB_SEPARATOR,
                                                   fullJobName, config.JOB_SEPARATOR,

@@ -33,7 +33,7 @@ icons = [
          ]
 
 a = Analysis(['main.py'],
-             pathex=['/home/wmegchel/Dropbox/Tools2020/GratiSSH'],
+             pathex=[],
              binaries=[],
              datas=icons,
              hiddenimports=[],

@@ -94,6 +94,8 @@ class JobForm(QDialog):
 
         # Memory
         self.spinMemory = QDoubleSpinBox()
+        self.spinMemory.setMinimum(0.0)
+        self.spinMemory.setMaximum(config.JOB_MAX_AMOUNT_OF_MEMORY_GB)
         self.spinMemory.setValue(self.job.memory)
         frmLayout.addRow(QLabel("Memory (GB):"), self.spinMemory)
 
@@ -216,6 +218,10 @@ class JobForm(QDialog):
         mem = QLabel("Memory (GB):")
         si = QLabel("Singularity image:")
         editor = QLabel("Editor:")
+        worker = QLabel("Worker node:")
+        port = QLabel("Port:")
+        starttime = QLabel("Start time:")
+        status = QLabel("Status:")
 
         bold = QFont()
         bold.setBold(True)
@@ -227,6 +233,17 @@ class JobForm(QDialog):
         mem.setFont(bold)
         si.setFont(bold)
         editor.setFont(bold)
+        worker.setFont(bold)
+        port.setFont(bold)
+        starttime.setFont(bold)
+        status.setFont(bold)
+
+        if self.job.status == 0:
+            stat = "Waiting for resources"
+        elif self.job.status == 1:
+            stat = "Running"
+        else:
+            stat = "Loading or deleting job"
 
         frmLayout.addRow(project, QLabel(self.job.connection.projectRootFolder + "/" + self.job.projectFolder))
         frmLayout.addRow(jobName, QLabel(self.job.jobName))
@@ -236,6 +253,10 @@ class JobForm(QDialog):
         frmLayout.addRow(mem, QLabel(str(self.job.memory)))
         frmLayout.addRow(si, QLabel(self.job.singularityImg))
         frmLayout.addRow(editor, QLabel(self.job.editor))
+        frmLayout.addRow(worker, QLabel(str(self.job.workerNode)))
+        frmLayout.addRow(port, QLabel(self.job.port))
+        frmLayout.addRow(starttime, QLabel(self.job.startTime))
+        frmLayout.addRow(status, QLabel(stat))
 
         ### Buttons
         QBtn = QDialogButtonBox.Ok #  | QDialogButtonBox.Cancel

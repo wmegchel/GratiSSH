@@ -1,19 +1,15 @@
 
 from sshtunnel import *
-from PyQt5.QtCore import *
 import os
-
+import config
 
 class Job:
 
-    #msgSignal = pyqtSignal(dict)
-
     def __init__(self, connection=None, jobID=None, jobName=None, projectFolder=None, startTime=None,
-                 runTime=2, nCPU=1, nGPU=0, memory=16, singularityImg=None,
-                 workerNode=None, status=None, editor=None, port=None, tunnel=None):
+                 runTime=config.JOB_DEFAULT_RUNTIME_HOURS, nCPU=config.JOB_DEFAULT_AMOUNT_OF_CPU,
+                 nGPU=config.JOB_DEFAULT_AMOUNT_GPU, memory=config.JOB_DEFAULT_AMOUNT_OF_MEMORY_GB,
+                 singularityImg=None, workerNode=None, status=None, editor=None, port=None, tunnel=None):
 
-        # super(Job, self).__init__()
-        # print("init super done")
         self.connection = connection
         self.jobID = jobID
         self.jobName = jobName
@@ -29,31 +25,29 @@ class Job:
         self.editor = editor
         self.port = port
         self.tunnel = tunnel
-        # print("all init done")
-
-        #super(Job, self).__init__(jobID)
 
     def openSSHTunnel(self, jobView):
 
         user_config_file = os.path.expanduser("~/.ssh/config")
 
         try:
-            if isinstance(self.tunnel, SSHTunnelForwarder) and self.tunnel.is_alive():
-                return
+            if isinstance(self.tunnel, SSHTunnelForwarder) and self.tunnel.is_alive:
+                return True
 
-            if self.connection.passphrase != "":
-                self.tunnel = SSHTunnelForwarder(self.connection.hostName, ssh_config_file=user_config_file,
-                                                 remote_bind_address=(self.workerNode, int(self.port)),
-                                                 local_bind_address=('localhost', int(self.port)),
-                                                 allow_agent=True, ssh_password=self.connection.passphrase,
-                                                 set_keepalive=10)
+            if self.connection.passphrase == "":
+                passphrase = None
             else:
-                self.tunnel = SSHTunnelForwarder(self.connection.hostName, ssh_config_file=user_config_file,
-                                                 remote_bind_address=(self.workerNode, int(self.port)),
-                                                 local_bind_address=('localhost', int(self.port)),
-                                                 allow_agent=True,
-                                                 set_keepalive=10)
+                passphrase = self.connection.passphrase
+
+            self.tunnel = SSHTunnelForwarder(ssh_address_or_host=self.connection.hostName,
+                                             ssh_private_key_password=passphrase,
+                                             ssh_config_file=user_config_file,
+                                             remote_bind_address=(self.workerNode, int(self.port)),
+                                             local_bind_address=('localhost', int(self.port)),
+                                             allow_agent=True,
+                                             set_keepalive=10)
             self.tunnel.start()
+
             return True
         except BaseSSHTunnelForwarderError as e:
             return str(e),

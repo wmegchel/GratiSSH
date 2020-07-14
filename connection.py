@@ -11,7 +11,8 @@ import stat
 class Connection:
 
     def __init__(self, connectionID=None, connectionName=None, hostName=None, passphrase=None,
-                 gridEngine=None, singularityFolder=None, projectRootFolder=None):
+                 gridEngine=None, singularityFolder=None, projectRootFolder=None,
+                 threadpool=QThreadPool(), sshClient=paramiko.SSHClient(), sftpClient=None):
         super(Connection, self).__init__()
 
         self.tblConnections = config.DB.table('connections')
@@ -24,10 +25,9 @@ class Connection:
         self.gridEngine = gridEngine
         self.singularityFolder = singularityFolder
         self.projectRootFolder = projectRootFolder
-
-        self.threadpool = QThreadPool()
-        self.sshClient = paramiko.SSHClient()
-        self.sftpClient = None # self.sshClient.open_sftp() # not clue if this works without connection
+        self.threadpool = threadpool
+        self.sshClient = sshClient
+        self.sftpClient = sftpClient
 
 
     # Setup the SSH connection on a separate thread to keep the app responsive
@@ -97,6 +97,7 @@ class Connection:
 
     def disconnect(self):
         self.sshClient.close()
+
 
 
 
