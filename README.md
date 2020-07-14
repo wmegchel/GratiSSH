@@ -26,8 +26,8 @@ binds the `/home/research` and `/scratch/wout` directories as well, which become
 
 ## Downloading the latest release build
 - Download the [latest release](https://github.com/wmegchel/GratiSSH/releases) under 'assets';
-- Unzip the program
-- Double click the unzipped program to start
+- Open a Shell and make the program executable: `chmod 755 GratiSSH`
+- Run the program with `./GratiSSH`
 
 ## Working with GratiSSH
 ### Adding/Editing a connection
@@ -129,4 +129,7 @@ Clone the git repository and run pyinstaller:
 pyinstaller --onefile gratissh_custom.spec
 ```
 The standalone executable will be created in the *dist* subfolder.
+
+# Acknowledgement
+GratiSSH is inspired by the [Rstudio Reproducibility Suite](https://github.com/Slacanch/RRS). GratiSSH uses PyQt5 to enable a more desktop-like interface and supports connections with multiple hosts using SGE or SLURM. 
 
