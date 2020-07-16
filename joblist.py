@@ -3,7 +3,7 @@ import config
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from waitingspinnerwidget import QtWaitingSpinner
+from pyqtspinner.spinner import WaitingSpinner
 import webbrowser
 from logger import Logger
 import sys
@@ -31,7 +31,7 @@ class JobList(QWidget):
         self.threadpool = QThreadPool()
 
         # Waiting spinner
-        self.spinner = QtWaitingSpinner(self.jobTableView)
+        self.spinner = WaitingSpinner(self.jobTableView)
         self.spinner.setNumberOfLines(18)
         self.spinner.setInnerRadius(12)
         self.spinner.setLineLength(20)

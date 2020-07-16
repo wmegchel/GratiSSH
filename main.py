@@ -421,7 +421,7 @@ class MyMainWindow(QMainWindow):
 
 if __name__ == "__main__":
     # Clear logs
-    config.DB.table("Log").purge()
+#    config.DB.table("Log").purge()
     app = QApplication(sys.argv)
     app.setStyle(QStyleFactory.create("Fusion"))
     app.setStyleSheet("QGroupBox { font-weight: bold; } ")
